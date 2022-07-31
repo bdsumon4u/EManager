@@ -10,6 +10,7 @@ use App\Actions\Jetstream\InviteTeamMember;
 use App\Actions\Jetstream\RemoveTeamMember;
 use App\Actions\Jetstream\UpdateTeamName;
 use App\Models\Admin;
+use App\Models\Merchant;
 use App\Models\Seller;
 use Hotash\Authable\Providers\AuthableServiceProvider;
 use Hotash\Authable\Registrar;
@@ -30,6 +31,28 @@ class JetstreamServiceProvider extends ServiceProvider
         Registrar::add('admin', Admin::class, [
             'fortify' => [
                 // FortifyFeatures::registration(),
+                FortifyFeatures::resetPasswords(),
+                FortifyFeatures::emailVerification(),
+                FortifyFeatures::updateProfileInformation(),
+                FortifyFeatures::updatePasswords(),
+                FortifyFeatures::twoFactorAuthentication([
+                    'confirm' => true,
+                    'confirmPassword' => true,
+                    'window' => 0,
+                ]),
+            ],
+            'jetstream' => [
+                JetstreamFeatures::termsAndPrivacyPolicy(),
+                JetstreamFeatures::profilePhotos(),
+                JetstreamFeatures::api(),
+                // JetstreamFeatures::teams(['invitations' => true]),
+                JetstreamFeatures::accountDeletion(),
+            ],
+        ]);
+
+        Registrar::add('merchant', Merchant::class, [
+            'fortify' => [
+                FortifyFeatures::registration(),
                 FortifyFeatures::resetPasswords(),
                 FortifyFeatures::emailVerification(),
                 FortifyFeatures::updateProfileInformation(),

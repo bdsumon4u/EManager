@@ -1,0 +1,46 @@
+<?php
+
+namespace Tests\Feature\Tenancy\Merchant;
+
+use App\Models\Merchant;
+use Hotash\Authable\Registrar;
+use Illuminate\Support\Str;
+use Laravel\Jetstream\Features;
+use Tests\RefreshTenantDatabase as RefreshDatabase;
+use Tests\TestCase;
+
+class ApiTokenPermissionsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected ?string $guard = 'merchant';
+
+    protected bool $tenancy = true;
+
+    public function test_api_token_permissions_can_be_updated()
+    {
+        if (! in_array(Features::api(), Registrar::features(guard: $this->guard, key: 'jetstream'))) {
+            return $this->markTestSkipped('API support is not enabled.');
+        }
+
+        $this->actingAs($merchant = Merchant::factory()->create(), $this->guard);
+
+        $token = $merchant->tokens()->create([
+            'name' => 'Test Token',
+            'token' => Str::random(40),
+            'abilities' => ['create', 'read'],
+        ]);
+
+        $response = $this->put('/user/api-tokens/'.$token->id, [
+            'name' => $token->name,
+            'permissions' => [
+                'delete',
+                'missing-permission',
+            ],
+        ]);
+
+        $this->assertTrue($merchant->fresh()->tokens->first()->can('delete'));
+        $this->assertFalse($merchant->fresh()->tokens->first()->can('read'));
+        $this->assertFalse($merchant->fresh()->tokens->first()->can('missing-permission'));
+    }
+}

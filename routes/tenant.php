@@ -33,6 +33,22 @@ Route::domain('admin.{domain}')->as('admin.')->group(function () {
     });
 });
 
+Route::domain('merchant.{domain}')->as('merchant.')->group(function () {
+    Route::get('/', function () {
+        return '[Merchant] Tenant ID: '.tenant('id');
+    });
+
+    Route::middleware([
+        'auth:sanctum',
+        config('jetstream.auth_session'),
+        'verified',
+    ])->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        })->name('dashboard');
+    });
+});
+
 Route::domain('seller.{domain}')->as('seller.')->group(function () {
     Route::get('/', function () {
         return '[Seller] Tenant ID: '.tenant('id');
