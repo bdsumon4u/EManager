@@ -9,6 +9,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "hotash/laravel-authable": "^2.0",
         "hotash/laravel-x-foreign": "^1.0",
+        "hotash/octane-tenancy": "^4.1",
         "inertiajs/inertia-laravel": "^0.5.2",
         "laravel/framework": "^9.19",
         "laravel/octane": "^1.2",
