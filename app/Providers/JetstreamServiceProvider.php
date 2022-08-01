@@ -15,6 +15,7 @@ use App\Models\Seller;
 use Hotash\Authable\Providers\AuthableServiceProvider;
 use Hotash\Authable\Registrar;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Jetstream\Features as JetstreamFeatures;
 use Laravel\Jetstream\Jetstream;
@@ -28,6 +29,8 @@ class JetstreamServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        Registrar::$viewSpace = [$this, 'viewSpace'];
+
         Registrar::add('admin', Admin::class, [
             'fortify' => [
                 // FortifyFeatures::registration(),
@@ -48,7 +51,7 @@ class JetstreamServiceProvider extends ServiceProvider
                 // JetstreamFeatures::teams(['invitations' => true]),
                 JetstreamFeatures::accountDeletion(),
             ],
-        ]);
+        ], [$this, 'viewSpace']);
 
         Registrar::add('merchant', Merchant::class, [
             'fortify' => [
@@ -70,7 +73,7 @@ class JetstreamServiceProvider extends ServiceProvider
                 // JetstreamFeatures::teams(['invitations' => true]),
                 JetstreamFeatures::accountDeletion(),
             ],
-        ]);
+        ], [$this, 'viewSpace']);
 
         Registrar::add('seller', Seller::class, [
             'fortify' => [
@@ -92,7 +95,24 @@ class JetstreamServiceProvider extends ServiceProvider
                 // JetstreamFeatures::teams(['invitations' => true]),
                 JetstreamFeatures::accountDeletion(),
             ],
-        ]);
+        ], [$this, 'viewSpace']);
+    }
+
+    public function viewSpace($guard): string
+    {
+        $namespace = '';
+        $host = request()->getHost();
+
+        if ($guard) {
+            $namespace = Str::ucfirst($guard).'/';
+            $host = Str::after($host, $guard.'.');
+        }
+
+        if (in_array($host, config('tenancy.central_domains'))) {
+            return $namespace;
+        }
+
+        return 'Tenant/'.$namespace;
     }
 
     /**

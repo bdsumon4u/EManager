@@ -18,6 +18,11 @@ export default defineConfig({
             },
         }),
     ],
+    resolve: {
+        alias: {
+            '%': '/system/themes',
+        },
+    },
     ssr: {
         noExternal: ['@inertiajs/server'],
     },
