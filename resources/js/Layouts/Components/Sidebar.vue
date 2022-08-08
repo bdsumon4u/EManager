@@ -22,11 +22,11 @@ const props = defineProps({
     sidebarToggle: Function,
 });
 
-const { items, hasSub, open_id, doOpen, isActive } = useSidebar(props.items);
+const { hasSub, isOpen, doOpen, isActive } = useSidebar();
 
 const closeSidebarDropdown = () => {
     if (!props.sidebarFull) {
-        open_id.value = null;
+        doOpen(null);
     }
 };
 
@@ -128,7 +128,7 @@ const itemText = computed(() => {
                     </div>
                     <ul
                         :ref="(el) => onClickOutside(el, closeSidebarDropdown)"
-                        v-show="item.children && open_id === item.id"
+                        v-show="item.children && isOpen(item.id)"
                         class="bg-gray-800 dark:bg-black"
                     >
                         <li class="title item-link">

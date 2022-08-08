@@ -1,17 +1,17 @@
 import { useEventListener } from "@vueuse/core";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useScreen } from "./useScreen";
 
-export function useSidebar(items = []) {
-    const open_id = ref(null);
-    const sidebarFull = ref(false);
+export function useSidebar() {
+    const openId = ref(null);
     const { isDevice } = useScreen();
+    const sidebarFull = ref(window.sidebarFull);
 
     const sidebarToggle = () => {
         sidebarFull.value = !sidebarFull.value;
     };
 
-    const shouldMaximize = () => {
+    const adjastDevice = () => {
         return (sidebarFull.value = isDevice("lg"));
     };
 
@@ -21,15 +21,19 @@ export function useSidebar(items = []) {
         target.style.height = px / 16 + "rem";
     };
 
+    const isOpen = (item_id) => {
+        return openId.value === item_id;
+    };
+
     const doOpen = (item_id) => {
-        open_id.value = open_id.value === item_id ? null : item_id;
+        openId.value = isOpen(item_id) ? null : item_id;
     };
 
     const hasSub = (item) => {
         let _class = "";
         if (item.children) {
             _class += "has-sub";
-            if (open_id.value === item.id) {
+            if (openId.value === item.id) {
                 _class += " open";
             }
         }
@@ -53,21 +57,22 @@ export function useSidebar(items = []) {
     };
 
     onMounted(() => {
-        shouldMaximize(); // onCreated
+        adjastDevice(); // onCreated
         setSidebarHeight(); // onMounted
     });
 
     useEventListener(window, "resize", () => {
-        shouldMaximize();
+        adjastDevice();
         setSidebarHeight();
     });
 
+    watch(sidebarFull, (newV) => (window.sidebarFull = newV));
+
     return {
         doOpen,
+        isOpen,
         hasSub,
         isActive,
-        items,
-        open_id,
         sidebarFull,
         sidebarToggle,
     };
